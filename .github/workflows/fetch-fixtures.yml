@@ -1,0 +1,64 @@
+name: Fetch Hockey Fixtures
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  
+  # Allow manual trigger from Actions tab
+  workflow_dispatch:
+
+jobs:
+  fetch-fixtures:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Fetch iCal feeds
+        env:
+          # Add your iCal URLs as repository secrets
+          FEED_URL_1: ${{ secrets.ICAL_FEED_1 }}
+          FEED_URL_2: ${{ secrets.ICAL_FEED_2 }}
+          FEED_URL_3: ${{ secrets.ICAL_FEED_3 }}
+          FEED_URL_4: ${{ secrets.ICAL_FEED_4 }}
+        run: |
+          echo "Fetching fixture feeds..."
+          
+          # Fetch each feed and save to file
+          curl -f -s -o feed1.ics "$FEED_URL_1" || echo "Failed to fetch feed 1"
+          curl -f -s -o feed2.ics "$FEED_URL_2" || echo "Failed to fetch feed 2"
+          curl -f -s -o feed3.ics "$FEED_URL_3" || echo "Failed to fetch feed 3"
+          curl -f -s -o feed4.ics "$FEED_URL_4" || echo "Failed to fetch feed 4"
+          
+          # Add timestamp
+          date > last_updated.txt
+          
+          echo "Fetch complete"
+      
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Commit and push if changed
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git add *.ics last_updated.txt
+          git commit -m "Update fixture feeds - $(date)"
+          git push
+      
+      - name: Summary
+        run: |
+          if [ "${{ steps.changes.outputs.changed }}" == "true" ]; then
+            echo "✅ Fixtures updated successfully"
+          else
+            echo "ℹ️ No changes detected"
+          fi

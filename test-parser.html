@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iCal Parser Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: 12px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #1e3c72;
+        }
+        .output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+        .event {
+            background: #e3f2fd;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .success {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        .error {
+            color: #c62828;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏒 iCal Parser Test</h1>
+    
+    <div class="section">
+        <h2>1. Paste Your iCal Data</h2>
+        <p>Paste the raw iCal/ICS content below, or load the sample file:</p>
+        <button onclick="loadSample()">Load Sample Data</button>
+        <textarea id="icsInput" placeholder="Paste iCal data here..."></textarea>
+        <button onclick="parseData()">Parse iCal</button>
+    </div>
+    
+    <div class="section">
+        <h2>2. Parsed Events</h2>
+        <div id="output"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Next Weekend Filter</h2>
+        <div id="weekendOutput"></div>
+    </div>
+
+    <script>
+        function parseICSDate(dateStr) {
+            dateStr = dateStr.replace(/[Z]/g, '');
+            
+            const year = parseInt(dateStr.substring(0, 4));
+            const month = parseInt(dateStr.substring(4, 6)) - 1;
+            const day = parseInt(dateStr.substring(6, 8));
+            
+            if (dateStr.length > 8) {
+                const hour = parseInt(dateStr.substring(9, 11));
+                const minute = parseInt(dateStr.substring(11, 13));
+                return new Date(year, month, day, hour, minute);
+            }
+            
+            return new Date(year, month, day);
+        }
+
+        function parseICS(icsText) {
+            const events = [];
+            const lines = icsText.split('\n').map(line => line.trim());
+            
+            let currentEvent = null;
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                
+                if (line === 'BEGIN:VEVENT') {
+                    currentEvent = {};
+                } else if (line === 'END:VEVENT' && currentEvent) {
+                    if (currentEvent.dtstart) {
+                        events.push(currentEvent);
+                    }
+                    currentEvent = null;
+                } else if (currentEvent) {
+                    if (line.startsWith('DTSTART')) {
+                        const dateStr = line.split(':')[1];
+                        currentEvent.dtstart = parseICSDate(dateStr);
+                    } else if (line.startsWith('SUMMARY:')) {
+                        currentEvent.summary = line.substring(8);
+                    } else if (line.startsWith('LOCATION:')) {
+                        currentEvent.location = line.substring(9);
+                    } else if (line.startsWith('DESCRIPTION:')) {
+                        currentEvent.description = line.substring(12);
+                    }
+                }
+            }
+            
+            return events;
+        }
+
+        function getNextWeekend() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            
+            let daysUntilSaturday;
+            if (dayOfWeek === 0) {
+                daysUntilSaturday = 6;
+            } else if (dayOfWeek === 6) {
+                daysUntilSaturday = 0;
+            } else {
+                daysUntilSaturday = 6 - dayOfWeek;
+            }
+            
+            const saturday = new Date(today);
+            saturday.setDate(today.getDate() + daysUntilSaturday);
+            saturday.setHours(0, 0, 0, 0);
+            
+            const sunday = new Date(saturday);
+            sunday.setDate(saturday.getDate() + 1);
+            
+            const mondayMorning = new Date(sunday);
+            mondayMorning.setDate(sunday.getDate() + 1);
+            
+            return { saturday, sunday, mondayMorning };
+        }
+
+        async function loadSample() {
+            try {
+                const response = await fetch('sample-feed.ics');
+                const text = await response.text();
+                document.getElementById('icsInput').value = text;
+                document.getElementById('output').innerHTML = '<p class="success">Sample data loaded! Click "Parse iCal" to test.</p>';
+            } catch (error) {
+                document.getElementById('output').innerHTML = `<p class="error">Could not load sample file: ${error.message}</p>`;
+            }
+        }
+
+        function parseData() {
+            const icsText = document.getElementById('icsInput').value;
+            const outputDiv = document.getElementById('output');
+            const weekendDiv = document.getElementById('weekendOutput');
+            
+            if (!icsText.trim()) {
+                outputDiv.innerHTML = '<p class="error">Please paste iCal data first!</p>';
+                return;
+            }
+            
+            try {
+                const events = parseICS(icsText);
+                
+                if (events.length === 0) {
+                    outputDiv.innerHTML = '<p class="error">No events found in the iCal data.</p>';
+                    weekendDiv.innerHTML = '';
+                    return;
+                }
+                
+                let html = `<p class="success">Found ${events.length} event(s):</p>`;
+                
+                events.forEach((event, index) => {
+                    html += `
+                        <div class="event">
+                            <strong>Event ${index + 1}:</strong><br>
+                            <strong>Date:</strong> ${event.dtstart.toLocaleString()}<br>
+                            <strong>Summary:</strong> ${event.summary || 'N/A'}<br>
+                            <strong>Location:</strong> ${event.location || 'N/A'}<br>
+                            <strong>Description:</strong> ${event.description || 'N/A'}
+                        </div>
+                    `;
+                });
+                
+                outputDiv.innerHTML = html;
+                
+                // Filter for next weekend
+                const weekend = getNextWeekend();
+                const weekendEvents = events.filter(event => {
+                    return event.dtstart >= weekend.saturday && 
+                           event.dtstart < weekend.mondayMorning;
+                });
+                
+                let weekendHtml = `<p><strong>Next Weekend:</strong> ${weekend.saturday.toDateString()} - ${weekend.sunday.toDateString()}</p>`;
+                
+                if (weekendEvents.length === 0) {
+                    weekendHtml += '<p>No fixtures for next weekend.</p>';
+                } else {
+                    weekendHtml += `<p class="success">Found ${weekendEvents.length} fixture(s) for next weekend:</p>`;
+                    
+                    weekendEvents.forEach((event, index) => {
+                        weekendHtml += `
+                            <div class="event">
+                                <strong>Fixture ${index + 1}:</strong><br>
+                                ${event.dtstart.toLocaleString()}<br>
+                                ${event.summary}
+                                ${event.location ? `<br>📍 ${event.location}` : ''}
+                            </div>
+                        `;
+                    });
+                }
+                
+                weekendDiv.innerHTML = weekendHtml;
+                
+            } catch (error) {
+                outputDiv.innerHTML = `<p class="error">Error parsing iCal: ${error.message}</p>`;
+                weekendDiv.innerHTML = '';
+            }
+        }
+    </script>
+</body>
+</html>
