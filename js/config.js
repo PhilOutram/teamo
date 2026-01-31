@@ -40,11 +40,11 @@ const CONFIG = {
     // Email Configuration (Optional)
     // Sign up at emailjs.com for free email service
     email: {
-        enabled: false,  // Set to true after configuring EmailJS
-        serviceId: 'YOUR_SERVICE_ID',
-        templateId: 'YOUR_TEMPLATE_ID',
-        userId: 'YOUR_USER_ID',
-        recipientEmail: 'your-email@example.com'
+        enabled: true,  // Set to true after configuring EmailJS
+        serviceId: 'service_o8b47y7',
+        templateId: 'template_inxi2hd',
+        userId: 'xptDbUUJb9PYrgzAa',
+        recipientEmail: 'phil_outram@hotmail.com'
     },
     
     // Display Settings

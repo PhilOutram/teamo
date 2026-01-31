@@ -138,14 +138,20 @@ function extractOpponent(summary, teamName) {
         /against\s+(.+?)$/i
     ];
     
+    let opponent = summary;
+    
     for (const pattern of patterns) {
         const match = summary.match(pattern);
         if (match) {
-            return match[1].trim();
+            opponent = match[1].trim();
+            break;
         }
     }
     
-    return summary;
+    // Remove "Start Time: XX:XX" text if present
+    opponent = opponent.replace(/\s*Start Time:\s*\d{1,2}:\d{2}\s*./gi, '');
+    
+    return opponent;
 }
 
 // Load fixtures from all teams
@@ -227,7 +233,7 @@ function displayFixtures() {
             <div class="team-section">
                 <div class="team-header">
                     <div class="team-icon">${teamData.team.icon}</div>
-                    <div class="team-name">${teamData.team.name}</div>
+                    <!--<div class="team-name">${teamData.team.name}</div>-->
                 </div>
         `;
         
@@ -244,7 +250,7 @@ function displayFixtures() {
                 html += `
                     <div class="fixture">
                         <div class="fixture-date">${formatFixtureDate(fixture.dtstart)} ⏰ ${formatTime(fixture.dtstart)}</div>
-                        <div class="fixture-opponent">🏒 ${opponent}</div>
+                        <div class="fixture-opponent">🏑 ${opponent}</div>
                         ${fixture.location ? `<div class="fixture-venue">📍 ${fixture.location}</div>` : ''}
                     </div>
                 `;
@@ -266,12 +272,10 @@ function displayFixtures() {
 
 // Send email summary
 function sendEmail() {
-    // This is a placeholder - you'll need to implement EmailJS or similar
-    alert('Email functionality requires EmailJS setup. See README for instructions.');
     
     // Example EmailJS implementation (uncomment after configuration):
-    /*
     const weekend = getNextWeekend();
+    let emailTitle = `Teamo match update - ${formatDate(weekend.saturday)} to ${formatDate(weekend.sunday)}`;
     let emailBody = `Hockey Fixtures for ${formatDate(weekend.saturday)} - ${formatDate(weekend.sunday)}\n\n`;
     
     for (const teamData of fixturesData) {
@@ -287,15 +291,14 @@ function sendEmail() {
             }
         }
     }
-    
-    emailBody += `View full details: ${window.location.href}`;
-    
+      
     emailjs.send(
         EMAILJS_CONFIG.serviceId,
         EMAILJS_CONFIG.templateId,
         {
             to_email: EMAILJS_CONFIG.recipientEmail,
             message: emailBody,
+            title: emailTitle,
             link: window.location.href
         },
         EMAILJS_CONFIG.userId
@@ -304,7 +307,6 @@ function sendEmail() {
     }).catch(error => {
         alert('Error sending email: ' + error.message);
     });
-    */
 }
 
 // Load fixtures on page load

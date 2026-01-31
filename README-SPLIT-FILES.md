@@ -57,7 +57,7 @@ Visit your GitHub Pages URL and it should work!
 - Update parsing functions
 
 ### To Change HTML Structure
-**Edit:** `index-split.html`
+**Edit:** `index.html`
 - Modify layout/structure
 - Add new sections
 
