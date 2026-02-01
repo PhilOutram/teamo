@@ -5,36 +5,12 @@ const CONFIG = {
     // Team Information
     // Replace with your actual iCal feed URLs from Teamo
     teams: [
-        {
-            name: "M4",
-            url: "https://web.teamo.chat/ical/iscahc/16150401/4th-XI-MenCalendar_matches.ics?noCache65",
-            icon: "M4"
-        },
-        {
-            name: "M5P",
-            url: "https://web.teamo.chat/ical/iscahc/16150402/5P-XI-MenCalendar_matches.ics?noCache21",
-            icon: "M5P"
-        },
-        {
-            name: "M5R",
-            url: "https://web.teamo.chat/ical/iscahc/16150403/5R-XI-MenCalendar_matches.ics?noCache43",
-            icon: "M5R"
-        },
-        {
-            name: "M7",
-            url: "https://web.teamo.chat/ical/iscahc/16150404/7th-XI-MenCalendar_matches.ics?noCache70",
-            icon: "M7"
-        },
-        {
-            name: "U14",
-            url: "https://web.teamo.chat/ical/iscahc/16150374/Boys-U14Calendar_matches.ics?noCache89",
-            icon: "U14"
-        },
-        {
-            name: "U16",
-            url: "https://web.teamo.chat/ical/iscahc/16150375/Boys-U16Calendar_matches.ics?noCache6",
-            icon: "U16"
-        },
+        { name: "M4",  file: "feed1.ics", icon: "M4"  },
+        { name: "M5P", file: "feed2.ics", icon: "M5P" },
+        { name: "M5R", file: "feed3.ics", icon: "M5R" },
+        { name: "M7",  file: "feed4.ics", icon: "M7"  },
+        { name: "U14", file: "feed5.ics", icon: "U14" },
+        { name: "U16", file: "feed6.ics", icon: "U16" },
     ],
     
     // Email Configuration (Optional)

@@ -175,9 +175,7 @@ async function loadFixtures() {
     try {
         for (const team of TEAMS) {
             try {
-                // Try AllOrigins proxy (more reliable for GitHub Pages)
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(team.url)}`;
-                const response = await fetch(proxyUrl);
+                const response = await fetch(team.file);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
