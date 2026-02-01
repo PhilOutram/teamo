@@ -32,36 +32,40 @@ jobs:
         run: |
           echo "Fetching fixture feeds..."
           
-          # Fetch each feed and save to file
+          # Create feeds directory
+          mkdir -p feeds
+          
+          # Fetch each feed and save to feeds folder
           echo "Fetching feed 1..."
-          curl -f -s -o feed1.ics "$FEED_URL_1" && echo "✅ Feed 1 fetched ($(wc -c < feed1.ics) bytes)" || echo "❌ Failed to fetch feed 1"
+          curl -f -s -o feeds/feed1.ics "$FEED_URL_1" && echo "✅ Feed 1 fetched ($(wc -c < feeds/feed1.ics) bytes)" || echo "❌ Failed to fetch feed 1"
           
           echo "Fetching feed 2..."
-          curl -f -s -o feed2.ics "$FEED_URL_2" && echo "✅ Feed 2 fetched ($(wc -c < feed2.ics) bytes)" || echo "❌ Failed to fetch feed 2"
+          curl -f -s -o feeds/feed2.ics "$FEED_URL_2" && echo "✅ Feed 2 fetched ($(wc -c < feeds/feed2.ics) bytes)" || echo "❌ Failed to fetch feed 2"
           
           echo "Fetching feed 3..."
-          curl -f -s -o feed3.ics "$FEED_URL_3" && echo "✅ Feed 3 fetched ($(wc -c < feed3.ics) bytes)" || echo "❌ Failed to fetch feed 3"
+          curl -f -s -o feeds/feed3.ics "$FEED_URL_3" && echo "✅ Feed 3 fetched ($(wc -c < feeds/feed3.ics) bytes)" || echo "❌ Failed to fetch feed 3"
           
           echo "Fetching feed 4..."
-          curl -f -s -o feed4.ics "$FEED_URL_4" && echo "✅ Feed 4 fetched ($(wc -c < feed4.ics) bytes)" || echo "❌ Failed to fetch feed 4"
+          curl -f -s -o feeds/feed4.ics "$FEED_URL_4" && echo "✅ Feed 4 fetched ($(wc -c < feeds/feed4.ics) bytes)" || echo "❌ Failed to fetch feed 4"
           
           echo "Fetching feed 5..."
-          curl -f -s -o feed5.ics "$FEED_URL_5" && echo "✅ Feed 5 fetched ($(wc -c < feed5.ics) bytes)" || echo "❌ Failed to fetch feed 5"
+          curl -f -s -o feeds/feed5.ics "$FEED_URL_5" && echo "✅ Feed 5 fetched ($(wc -c < feeds/feed5.ics) bytes)" || echo "❌ Failed to fetch feed 5"
           
           echo "Fetching feed 6..."
-          curl -f -s -o feed6.ics "$FEED_URL_6" && echo "✅ Feed 6 fetched ($(wc -c < feed6.ics) bytes)" || echo "❌ Failed to fetch feed 6"
+          curl -f -s -o feeds/feed6.ics "$FEED_URL_6" && echo "✅ Feed 6 fetched ($(wc -c < feeds/feed6.ics) bytes)" || echo "❌ Failed to fetch feed 6"
           
           # Add timestamp
-          date > last_updated.txt
+          date > feeds/last_updated.txt
           
           echo "Fetch complete"
           echo "Files created:"
-          ls -lh *.ics last_updated.txt 2>/dev/null || echo "No files created"
+          ls -lh feeds/*.ics feeds/last_updated.txt 2>/dev/null || echo "No files created"
       
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet; then
+          git add feeds/*.ics feeds/last_updated.txt
+          if git diff --cached --quiet; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -72,7 +76,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
-          git add *.ics last_updated.txt
+          git add feeds/*.ics feeds/last_updated.txt
           git commit -m "Update fixture feeds - $(date)"
           git push
       
