@@ -175,8 +175,8 @@ async function loadFixtures() {
     try {
         for (const team of TEAMS) {
             try {
-                // Using CORS proxy for development - replace with direct URL if CORS is enabled
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(team.url)}`;
+                // Try AllOrigins proxy (more reliable for GitHub Pages)
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(team.url)}`;
                 const response = await fetch(proxyUrl);
                 
                 if (!response.ok) {
