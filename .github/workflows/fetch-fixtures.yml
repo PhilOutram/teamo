@@ -23,6 +23,8 @@ jobs:
           FEED_URL_2: ${{ secrets.ICAL_FEED_2 }}
           FEED_URL_3: ${{ secrets.ICAL_FEED_3 }}
           FEED_URL_4: ${{ secrets.ICAL_FEED_4 }}
+          FEED_URL_5: ${{ secrets.ICAL_FEED_5 }}
+          FEED_URL_6: ${{ secrets.ICAL_FEED_6 }}
         run: |
           echo "Fetching fixture feeds..."
           
@@ -38,6 +40,12 @@ jobs:
           
           echo "Fetching feed 4..."
           curl -f -s -o feed4.ics "$FEED_URL_4" && echo "✅ Feed 4 fetched ($(wc -c < feed4.ics) bytes)" || echo "❌ Failed to fetch feed 4"
+          
+          echo "Fetching feed 5..."
+          curl -f -s -o feed5.ics "$FEED_URL_5" && echo "✅ Feed 5 fetched ($(wc -c < feed5.ics) bytes)" || echo "❌ Failed to fetch feed 5"
+          
+          echo "Fetching feed 6..."
+          curl -f -s -o feed6.ics "$FEED_URL_6" && echo "✅ Feed 6 fetched ($(wc -c < feed6.ics) bytes)" || echo "❌ Failed to fetch feed 6"
           
           # Add timestamp
           date > last_updated.txt
