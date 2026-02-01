@@ -27,15 +27,24 @@ jobs:
           echo "Fetching fixture feeds..."
           
           # Fetch each feed and save to file
-          curl -f -s -o feed1.ics "$FEED_URL_1" || echo "Failed to fetch feed 1"
-          curl -f -s -o feed2.ics "$FEED_URL_2" || echo "Failed to fetch feed 2"
-          curl -f -s -o feed3.ics "$FEED_URL_3" || echo "Failed to fetch feed 3"
-          curl -f -s -o feed4.ics "$FEED_URL_4" || echo "Failed to fetch feed 4"
+          echo "Fetching feed 1..."
+          curl -f -s -o feed1.ics "$FEED_URL_1" && echo "✅ Feed 1 fetched ($(wc -c < feed1.ics) bytes)" || echo "❌ Failed to fetch feed 1"
+          
+          echo "Fetching feed 2..."
+          curl -f -s -o feed2.ics "$FEED_URL_2" && echo "✅ Feed 2 fetched ($(wc -c < feed2.ics) bytes)" || echo "❌ Failed to fetch feed 2"
+          
+          echo "Fetching feed 3..."
+          curl -f -s -o feed3.ics "$FEED_URL_3" && echo "✅ Feed 3 fetched ($(wc -c < feed3.ics) bytes)" || echo "❌ Failed to fetch feed 3"
+          
+          echo "Fetching feed 4..."
+          curl -f -s -o feed4.ics "$FEED_URL_4" && echo "✅ Feed 4 fetched ($(wc -c < feed4.ics) bytes)" || echo "❌ Failed to fetch feed 4"
           
           # Add timestamp
           date > last_updated.txt
           
           echo "Fetch complete"
+          echo "Files created:"
+          ls -lh *.ics last_updated.txt 2>/dev/null || echo "No files created"
       
       - name: Check for changes
         id: changes
