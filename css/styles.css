@@ -205,6 +205,32 @@ button:disabled {
     font-size: 0.9em;
 }
 
+/* Shown instead of the grid when no team has a fixture ahead of today. */
+.between-seasons {
+    text-align: center;
+    padding: 40px 24px;
+    max-width: 460px;
+    margin: 0 auto;
+}
+
+.between-seasons-icon {
+    font-size: 2.6em;
+    line-height: 1;
+    margin-bottom: 12px;
+}
+
+.between-seasons h2 {
+    margin: 0 0 10px;
+    font-size: 1.15em;
+}
+
+.between-seasons p {
+    margin: 0;
+    color: #999;
+    font-size: 0.92em;
+    line-height: 1.5;
+}
+
 .error {
     background: #ffebee;
     color: #c62828;

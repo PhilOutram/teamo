@@ -192,10 +192,17 @@ async function loadFixtures() {
                 
                 // Sort by date/time
                 weekendEvents.sort((a, b) => a.dtstart - b.dtstart);
-                
+
+                // Any fixture still to come, not just this weekend's. Lets the
+                // renderer tell a quiet weekend mid-season apart from a feed
+                // that holds no new season yet.
+                const now = new Date();
+                const hasUpcoming = events.some(event => event.dtstart >= now);
+
                 fixturesData.push({
                     team: team,
-                    fixtures: weekendEvents
+                    fixtures: weekendEvents,
+                    hasUpcoming: hasUpcoming
                 });
             } catch (error) {
                 console.error(`Error loading fixtures for ${team.name}:`, error);
@@ -222,10 +229,29 @@ async function loadFixtures() {
 function displayFixtures() {
     const contentDiv = document.getElementById('content');
     const messageDiv = document.getElementById('message');
-    
+
+    // Between seasons every feed still loads but holds nothing ahead of today.
+    // Six empty team cards reads as a broken app, so say what is happening
+    // instead of rendering the grid.
+    const loaded = fixturesData.filter(teamData => !teamData.error);
+    const betweenSeasons = loaded.length > 0 && loaded.every(teamData => !teamData.hasUpcoming);
+
+    if (betweenSeasons) {
+        contentDiv.innerHTML = `
+            <div class="between-seasons">
+                <div class="between-seasons-icon">🏑</div>
+                <h2>No fixtures scheduled yet</h2>
+                <p>The season has finished and the new one has not been published.
+                   Fixtures appear here automatically as soon as they are.</p>
+            </div>
+        `;
+        messageDiv.innerHTML = '';
+        return;
+    }
+
     let html = '<div class="fixtures-grid">';
     let totalFixtures = 0;
-    
+
     for (const teamData of fixturesData) {
         html += `
             <div class="team-section">
